@@ -52,9 +52,21 @@ for placeMark in root.findall(".//kml:Placemark", namespaces):
           element = ElementTree.Element("styleUrl")
           element.text = "#tidal"
           placeMark.insert(0, element)
+          element = ElementTree.Element("name")
+          element.text = "Tide level"
+          placeMark.insert(0, element)
+          element = ElementTree.Element("description")
+          element.text = "Increased tide level from the given rise in sea level."
+          placeMark.insert(0, element)
       elif simpleData.text == "255":
           element = ElementTree.Element("styleUrl")
           element.text = "#flood"
+          placeMark.insert(0, element)
+          element = ElementTree.Element("name")
+          element.text = "Flood level"
+          placeMark.insert(0, element)
+          element = ElementTree.Element("description")
+          element.text = "Area covered by rise in sea level."
           placeMark.insert(0, element)
 
 tree.write(sys.argv[1])
