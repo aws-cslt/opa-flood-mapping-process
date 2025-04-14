@@ -28,7 +28,7 @@ x_length <- (as.double(args[4]) - as.double(args[2])) / dim
 y_length <- (as.double(args[5]) - as.double(args[3])) / dim
 area <- x_length * y_length
 new_dim <- ceiling(sqrt((area / pixel_limit))) * dim
-
+if(dim > new_dim) new_dim <= dim
 unlink(paste(GetCubesDir(), "NewStacCube.db", sep = ""))
 col <- stac_image_collection(items$features,
                              paste(GetCubesDir(), "NewStacCube.db", sep = ""))

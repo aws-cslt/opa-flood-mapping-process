@@ -11,6 +11,7 @@ job_config = os.environ['JOB_CONFIG']
 job_parameters = os.environ['JOB_PARAMETERS']
 status_socket = os.environ['STATUS_SOCKET']
 result_url = os.environ['RESULT_URL']
+execution_lang = os.environ['EXECUTION_LANG']
 
 async def runProcess(job_id, job_config, job_parameters, status_socket, result_url):
     jobProgress = "0"
@@ -18,6 +19,7 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
         try:
             status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"running\",\"progress\":"+ jobProgress +",\"message\":\"Process started.\"}"
             await websocket.send(status_update)
+            print("Update websocket:" + status_update)
             output_format = None
             x_min = None
             x_max = None
@@ -31,6 +33,7 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
             config_json = json.loads(job_config)
             file_format = None
             include_tide = "true"
+            lang = "en"
             if "stac_api_link" in config_json:
                 stac_api_link = config_json["stac_api_link"]
             if "pixel_limit" in config_json:
@@ -70,6 +73,7 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
             if output_format == None or x_min == None or y_min == None or x_max == None or y_max == None or source_data == None or sea_level_rise == None:
                 status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Failed to run\"}"
                 await websocket.send(status_update)
+                print("Update websocket:" + status_update)
                 return
             else :
                 process = subprocess.Popen(["Rscript", "/opt/scripts/cslt-query-COG-DataCube.r", job_id, output_format, str(x_min), str(y_min), str(x_max), str(y_max), source_data, str(sea_level_rise), include_tide, stac_api_link, str(pixel_limit)])
@@ -85,37 +89,43 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
                         if lastRun:
                             status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Process finished running but didn't return a result.\"}"
                             await websocket.send(status_update)
+                            print("Update websocket:" + status_update)
                             return
                         if not process.poll() is None:
                             lastRun = True
-                        time.sleep(1)
-                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"running\",\"progress\":" + jobProgress + ",\"message\":\"Process is currently running.\"}"
-                await websocket.send(status_update)
+                        time.sleep(0.02)
                 while(process_running):
+                    time.sleep(0.02)
                     if os.path.isfile("/opt/cubes/" + job_id + "-error"):
                         error_file = open("/opt/cubes/" + job_id + "-error")
                         jobMessage = error_file.readline()
                         status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":" + jobProgress + ",\"message\":\"" + jobMessage + "\"}"
                         await websocket.send(status_update)
+                        print("Update websocket:" + status_update)
                         return
                     elif os.path.isfile("/opt/cubes/" + job_id + "-finished.json"):
                         finished_file = open("/opt/cubes/" + job_id + "-finished.json")
                         with finished_file as f:
                                 finished_file_data = f.read()
+                        print("finished File:" + str(finished_file))
                         finished_json = json.loads(finished_file_data)
                         if "path" in finished_json:
+                            print("Path:" + finished_json["path"])
                             file_path = finished_json["path"]
                             file_name = file_path[file_path.rfind("/") +1:]
                             with open(file_path, 'rb') as f2:
                                 data = f2.read()
+                            print("read file.")
                             resp = requests.put(url=result_url, data=data)
                             status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"successful\",\"progress\":100,\"message\":\"Process has been completed.\",\"filename\":\"" + file_name + "\",\"contentType\":\"" + file_format + "\"}"
+                            print("Update websocket:" + status_update)
                             await websocket.send(status_update)
                             return
                     else :
                         if lastRun:
                             status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":" + jobProgress + ",\"message\":\"Process finished running but didn't return a result.\"}"
                             await websocket.send(status_update)
+                            print("Update websocket:" + status_update)
                             return
                         if not process.poll() is None:
                             lastRun = True
@@ -127,10 +137,12 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
                                 if new_progress != jobProgress:
                                     jobProgress = new_progress
                                     status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"running\",\"progress\":" + jobProgress + ",\"message\":\"Process is currently running.\"}"
+                                    print("Update websocket:" + status_update)
                                     await websocket.send(status_update)
         except Exception as e:
             print(e)
             status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"An exception occurred when running the process\"}"
             await websocket.send(status_update)
+            print("Update websocket:" + status_update)
             return
 asyncio.run(runProcess(job_id, job_config, job_parameters, status_socket, result_url))

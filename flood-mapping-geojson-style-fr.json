@@ -1,0 +1,64 @@
+{
+    "layerName":"Valeurs des inondations",
+    "source":{
+       "featureInfo":{
+          "queryable":true,
+          "nameField":"title_fr",
+          "outfields":[
+             {
+                "name":"DN",
+                "alias":"Type d'inondation",
+                "type":"string",
+                "domain":null
+             }
+          ]
+       }
+    },
+    "layerStyle":{
+       "Polygon":{
+          "type":"uniqueValue",
+          "fields":[
+             "DN"
+          ],
+          "hasDefault":true,
+          "info":[
+             {
+                "label":"Valeur de la marée",
+                "values":[
+                   "1"
+                ],
+                "visible":true,
+                "settings":{
+                   "type":"filledPolygon",
+                   "color":"rgba(255,0,0,0.50)",
+                   "paternSize":10,
+                   "paternWidth":2,
+                   "fillStyle":"solid",
+                   "stroke":{
+                      "color":"rgba(255,0,0,1)",
+                      "lineStyle":"solid"
+                   }
+                }
+             },
+             {
+                "label":"Valeur d'inondation",
+                "values":[
+                   "255"
+                ],
+                "visible":true,
+                "settings":{
+                   "type":"filledPolygon",
+                   "color":"rgba(0,0,255,0.50)",
+                   "paternSize":10,
+                   "paternWidth":2,
+                   "fillStyle":"solid",
+                   "stroke":{
+                      "color":"rgba(0,0,255,1)",
+                      "lineStyle":"solid"
+                   }
+                }
+             }
+          ]
+       }
+    }
+ }
