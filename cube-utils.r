@@ -245,8 +245,8 @@ WriteOutput <- function(cube, uuid, output_format, pack_func=NULL, metadata=NULL
 		geojson_loc = paste(GetCubesDir(), uuid, "-vectorResult.geojson", sep="")
 		#overwrite parameter in gdal not working, delete file if it exists before writing
 		unlink(geojson_loc)
-		
 		system(paste("gdal_polygonize.py ", tif_loc, " ", geojson_temp_loc, " -overwrite", sep=""))
+		system(paste("python3 addStyleToGeoJson.py", geojson_temp_loc))
 		system(paste("ogr2ogr ", "-f", "GeoJSON", "-lco RFC7946=YES", geojson_loc, geojson_temp_loc, sep=" "))
 		#This deletes the temp file
 		unlink(geojson_temp_loc)

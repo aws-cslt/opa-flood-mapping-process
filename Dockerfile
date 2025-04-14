@@ -55,6 +55,9 @@ COPY cslt-query-COG-DataCube.r /opt/scripts/
 COPY StacCubeCreation.r /opt/scripts/
 COPY HandleProcess.py /opt/scripts/
 COPY editKML.py /opt/scripts/
+COPY flood-mapping-geojson-style-en.json /opt/scripts/
+COPY flood-mapping-geojson-style-fr.json /opt/scripts/
+COPY addStyleToGeoJson.py /opt/scripts/
 COPY DEM.json /usr/local/lib/R/site-library/gdalcubes/formats/
 COPY 20230710can_tide_interp.tif /opt/data/CanCoastTidalRange/
 RUN apt-get install -y python3-websockets
