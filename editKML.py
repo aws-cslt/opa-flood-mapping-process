@@ -29,6 +29,17 @@ style_flood = """
 """
 
 
+if sys.argv[2] == "fr":
+  tide_title = "Niveau de marée"
+  tide_description = "Augmentation du niveau de la marée due à la hausse du niveau de la mer."
+  flood_title = "Niveau d'inondation"
+  flood_description = "Zone couverte par l'élévation du niveau de la mer."
+else:
+  tide_title = "Tide level"
+  tide_description = "Increased tide level from the given rise in sea level."
+  flood_title = "Flood level"
+  flood_description = "Area covered by rise in sea level."
+
 tree = ElementTree.parse(sys.argv[1])
 root = tree.getroot()
 
@@ -53,20 +64,20 @@ for placeMark in root.findall(".//kml:Placemark", namespaces):
           element.text = "#tidal"
           placeMark.insert(0, element)
           element = ElementTree.Element("name")
-          element.text = "Tide level"
+          element.text = tide_title
           placeMark.insert(0, element)
           element = ElementTree.Element("description")
-          element.text = "Increased tide level from the given rise in sea level."
+          element.text = tide_description
           placeMark.insert(0, element)
       elif simpleData.text == "255":
           element = ElementTree.Element("styleUrl")
           element.text = "#flood"
           placeMark.insert(0, element)
           element = ElementTree.Element("name")
-          element.text = "Flood level"
+          element.text = flood_title
           placeMark.insert(0, element)
           element = ElementTree.Element("description")
-          element.text = "Area covered by rise in sea level."
+          element.text = flood_description
           placeMark.insert(0, element)
 
 tree.write(sys.argv[1])
