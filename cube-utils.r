@@ -194,7 +194,7 @@ SaveCubeNcdf <- function(cube, file_name, chunked=FALSE){
 #' @param output_format the format to return the cube. (raw, cube, image)
 #' @param pack_func if writing the cube as an image, can optionally provide a pack_minmax function
 #' @export
-WriteOutput <- function(cube, uuid, output_format, pack_func=NULL, metadata=NULL) {
+WriteOutput <- function(cube, uuid, output_format, lang="en", pack_func=NULL, metadata=NULL) {
 	
 	gdalcubes_options(show_progress=TRUE);
 	status_loc = paste(cubes_dir, uuid, "-status", sep="");
@@ -235,8 +235,8 @@ WriteOutput <- function(cube, uuid, output_format, pack_func=NULL, metadata=NULL
 		#overwrite parameter in gdal not working, delete file if it exists before writing
 		unlink(kml_loc)
 
-		system(paste("gdal_polygonize.py ", tif_loc, " ", kml_loc, sep=""))
-		system(paste("python3 editKML.py ", kml_loc, sep=""))
+		system(paste("gdal_polygonize.py", tif_loc, kml_loc))
+		system(paste("python3 editKML.py", kml_loc, lang))
 		data = toJSON(list(path=kml_loc), auto_unbox=TRUE)
 	} else if (output_format == "geojson") {
 		result_file_name = paste(uuid, "-result", sep="")
@@ -245,9 +245,9 @@ WriteOutput <- function(cube, uuid, output_format, pack_func=NULL, metadata=NULL
 		geojson_loc = paste(GetCubesDir(), uuid, "-vectorResult.geojson", sep="")
 		#overwrite parameter in gdal not working, delete file if it exists before writing
 		unlink(geojson_loc)
-		system(paste("gdal_polygonize.py ", tif_loc, " ", geojson_temp_loc, " -overwrite", sep=""))
-		system(paste("python3 addStyleToGeoJson.py", geojson_temp_loc))
-		system(paste("ogr2ogr ", "-f", "GeoJSON", "-lco RFC7946=YES", geojson_loc, geojson_temp_loc, sep=" "))
+		system(paste("gdal_polygonize.py", tif_loc, geojson_temp_loc, "-overwrite"))
+		system(paste("python3 addStyleToGeoJson.py", geojson_temp_loc, lang))
+		system(paste("ogr2ogr", "-f", "GeoJSON", "-lco RFC7946=YES", geojson_loc, geojson_temp_loc))
 		#This deletes the temp file
 		unlink(geojson_temp_loc)
 		data = toJSON(list(path=geojson_loc), auto_unbox=TRUE)

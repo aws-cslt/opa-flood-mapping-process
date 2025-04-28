@@ -10,20 +10,25 @@ tryCatch({
     error_msg <- "At least eight arguments must be supplied to the process."
     stop(error_msg, call. = FALSE)
   }
-  if (length(args) > 10) {
+  if (length(args) > 11) {
     res <- system(paste("Rscript StacCubeCreation.r",
-                        args[7], args[3], args[4], args[5], args[6], args[10], args[11], sep = " "))
-  } else if (length(args) == 10) {
+                        args[7], args[3], args[4], args[5], args[6], args[11], args[12], sep = " "))
+  } else if (length(args) == 11) {
     res <- system(paste("Rscript StacCubeCreation.r",
-                        args[7], args[3], args[4], args[5], args[6], args[10], sep = " "))
+                        args[7], args[3], args[4], args[5], args[6], args[11], sep = " "))
   } else {
     res <- system(paste("Rscript StacCubeCreation.r",
                         args[7], args[3], args[4], args[5], args[6], sep = " "))
   }
 
   if (res == "1") {
-    error_msg <- "An unexpected error occured with harvesting."
-    + " Ensure the bounding box is within bounds of the data"
+	if (length(args) >= 10 && toupper(args[10]) == "FR") {
+		error_msg <- "Une erreur inattendue s'est produite lors de la collecte. " 
+		+ "Assurez-vous que le cadre de délimitation est dans les limites des données."
+	} else {
+		error_msg <- "An unexpected error occured with harvesting."
+		+ " Ensure the bounding box is within bounds of the data"
+	}
     stop(error_msg)
   }
 
@@ -39,6 +44,13 @@ tryCatch({
     include_tide <- FALSE
   }
 
+  lang <- "en"
+
+  if (length(args) >= 10 && toupper(args[10]) == "FR") {
+    lang <- "fr"
+  }
+
+
   if (((dimensions$x$low > as.double(args[3]))
        || (dimensions$x$low > as.double(args[5])))
       || ((dimensions$x$high < as.double(args[3]))
@@ -47,7 +59,11 @@ tryCatch({
           || (dimensions$y$high < as.double(args[6])))
       || ((dimensions$y$low > as.double(args[4]))
           || (dimensions$y$low > as.double(args[6])))) {
-    error_msg <- "Bounding box out of bounds of the data."
+	if(lang == "fr") {
+    	error_msg <- "Cadre de délimitation hors des limites des données."
+	} else {
+		error_msg <- "Bounding box out of bounds of the data."
+	}
     stop(error_msg)
   } else {
     new_dimensions <- c(args[3], args[4],
@@ -73,7 +89,7 @@ tryCatch({
                                  c("r", "g", "b", "a"))
       }
       pack_func <- pack_minmax(type = "uint8", 0, 255)
-      WriteOutput(rgba_cube, uuid, output_format, pack_func = pack_func)
+      WriteOutput(rgba_cube, uuid, output_format, lang=lang, pack_func = pack_func)
 
     } else if (output_format == "shape") {
       flood_area <- paste("((", sea_rise, ">= dtm) && (0 <= dtm)) * 255")
@@ -92,7 +108,7 @@ tryCatch({
                                                c("b")), "((0 < b))")
       }
       pack_func <- pack_minmax(type = "uint8", 0, 255)
-      WriteOutput(final_cube, uuid, output_format, pack_func = pack_func)
+      WriteOutput(final_cube, uuid, output_format, lang=lang, pack_func = pack_func)
     } else if (output_format == "kml") {
       flood_area <- paste("((", sea_rise, ">= dtm) && (0 <= dtm)) * 255")
       if (include_tide) {
@@ -110,7 +126,7 @@ tryCatch({
                                                c("b")), "((0 < b))")
       }
       pack_func <- pack_minmax(type = "uint8", 0, 255)
-      WriteOutput(final_cube, uuid, output_format, pack_func = pack_func)
+      WriteOutput(final_cube, uuid, output_format, lang=lang, pack_func = pack_func)
     } else if (output_format == "geojson") {
       flood_area <- paste("((", sea_rise, ">= dtm) && (0 <= dtm)) * 255")
       if (include_tide) {
@@ -128,7 +144,7 @@ tryCatch({
                                                c("b")), "((0 < b))")
       }
       pack_func <- pack_minmax(type = "uint8", 0, 255)
-      WriteOutput(final_cube, uuid, output_format, pack_func = pack_func)
+      WriteOutput(final_cube, uuid, output_format, lang=lang, pack_func = pack_func)
     }
   }
 }, error = function(e) {
