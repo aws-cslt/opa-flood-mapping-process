@@ -16,7 +16,10 @@ execution_lang = os.environ['EXECUTION_LANG']
 async def runProcess(job_id, job_config, job_parameters, status_socket, result_url, execution_lang, websocket):
     jobProgress = "0"
     try:
-        status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"running\",\"progress\":"+ jobProgress +",\"message\":\"Process started.\"}"
+        if execution_lang == "fr":
+            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"running\",\"progress\":"+ jobProgress +",\"message\":\"Processus démarré.\"}"
+        else :
+            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"running\",\"progress\":"+ jobProgress +",\"message\":\"Process started.\"}"
         if not websocket is None:
             await websocket.send(status_update)
             print("Update websocket:" + status_update)
@@ -80,7 +83,10 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
                 file_format = "application/geo+json"
 
         if output_format == None or x_min == None or y_min == None or x_max == None or y_max == None or source_data == None or sea_level_rise == None:
-            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Failed to run\"}"
+            if execution_lang == "fr":
+                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Échec de l'exécution.\"}"
+            else:
+                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Failed to run.\"}"
             if not websocket is None:
                 await websocket.send(status_update)
                 print("Update websocket:" + status_update)
@@ -101,7 +107,10 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
                     process_running = True
                 else :
                     if lastRun:
-                        status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Process finished running but didn't return a result.\"}"
+                        if execution_lang == "fr":
+                            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Le processus a terminé son exécution mais n'a pas renvoyé de résultat.\"}"
+                        else:
+                            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Process finished running but didn't return a result.\"}"
                         if not websocket is None:
                             await websocket.send(status_update)
                             print("Update websocket:" + status_update)
@@ -118,7 +127,10 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
                 if os.path.isfile("/opt/cubes/" + job_id + "-error"):
                     error_file = open("/opt/cubes/" + job_id + "-error")
                     jobMessage = error_file.readline()
-                    status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":" + jobProgress + ",\"message\":\"" + jobMessage + "\"}"
+                    if execution_lang == "fr":
+                        status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":" + jobProgress + ",\"message\":\"" + jobMessage + "\"}"
+                    else:
+                        status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":" + jobProgress + ",\"message\":\"" + jobMessage + "\"}"
                     if not websocket is None:
                         await websocket.send(status_update)
                         print("Update websocket:" + status_update)
@@ -141,7 +153,10 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
                             data = f2.read()
                         print("read file.")
                         resp = requests.put(url=result_url, data=data)
-                        status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"successful\",\"progress\":100,\"message\":\"Process has been completed.\",\"filename\":\"" + file_name + "\",\"contentType\":\"" + file_format + "\"}"
+                        if execution_lang == "fr":
+                            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"successful\",\"progress\":100,\"message\":\"Le processus est terminé.\",\"filename\":\"" + file_name + "\",\"contentType\":\"" + file_format + "\"}"
+                        else:
+                            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"successful\",\"progress\":100,\"message\":\"Process has been completed.\",\"filename\":\"" + file_name + "\",\"contentType\":\"" + file_format + "\"}"
                         if not websocket is None:
                             await websocket.send(status_update)
                             print("Update websocket:" + status_update)
@@ -152,7 +167,10 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
                         return
                 else :
                     if lastRun:
-                        status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":" + jobProgress + ",\"message\":\"Process finished running but didn't return a result.\"}"
+                        if execution_lang == "fr":
+                            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":" + jobProgress + ",\"message\":\"Le processus a terminé son exécution mais n'a pas renvoyé de résultat.\"}"
+                        else:
+                            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":" + jobProgress + ",\"message\":\"Process finished running but didn't return a result.\"}"
                         if not websocket is None:
                             await websocket.send(status_update)
                             print("Update websocket:" + status_update)
@@ -170,7 +188,10 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
                             new_progress = last_status.split(" ")[-2]
                             if new_progress != jobProgress:
                                 jobProgress = new_progress
-                                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"running\",\"progress\":" + jobProgress + ",\"message\":\"Process is currently running.\"}"
+                                if execution_lang == "fr":
+                                    status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"running\",\"progress\":" + jobProgress + ",\"message\":\"Le processus est actuellement en cours d'exécution.\"}"
+                                else:
+                                    status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"running\",\"progress\":" + jobProgress + ",\"message\":\"Process is currently running.\"}"
                                 if not websocket is None:
                                     await websocket.send(status_update)
                                     print("Update websocket:" + status_update)
@@ -180,7 +201,10 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
                                     print("resp: " + str(post_resp))
     except Exception as e:
         print(e)
-        status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"An exception occurred when running the process\"}"
+        if execution_lang == "fr":
+            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Une exception s'est produite lors de l'exécution du processus.\"}"
+        else:
+            status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"An exception occurred when running the process.\"}"
         if not websocket is None:
             await websocket.send(status_update)
             print("Update websocket:" + status_update)

@@ -22,8 +22,13 @@ tryCatch({
   }
 
   if (res == "1") {
-    error_msg <- "An unexpected error occured with harvesting."
-    + " Ensure the bounding box is within bounds of the data"
+	if (length(args) >= 10 && toupper(args[10]) == "FR") {
+		error_msg <- "Une erreur inattendue s'est produite lors de la collecte. " 
+		+ "Assurez-vous que le cadre de délimitation est dans les limites des données."
+	} else {
+		error_msg <- "An unexpected error occured with harvesting."
+		+ " Ensure the bounding box is within bounds of the data"
+	}
     stop(error_msg)
   }
 
@@ -54,7 +59,11 @@ tryCatch({
           || (dimensions$y$high < as.double(args[6])))
       || ((dimensions$y$low > as.double(args[4]))
           || (dimensions$y$low > as.double(args[6])))) {
-    error_msg <- "Bounding box out of bounds of the data."
+	if(lang == "fr") {
+    	error_msg <- "Cadre de délimitation hors des limites des données."
+	} else {
+		error_msg <- "Bounding box out of bounds of the data."
+	}
     stop(error_msg)
   } else {
     new_dimensions <- c(args[3], args[4],
