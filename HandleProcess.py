@@ -82,11 +82,50 @@ async def runProcess(job_id, job_config, job_parameters, status_socket, result_u
                 output_format = "geojson"
                 file_format = "application/geo+json"
 
-        if output_format == None or x_min == None or y_min == None or x_max == None or y_max == None or source_data == None or sea_level_rise == None:
+        if x_min == None or y_min == None or x_max == None or y_max == None:
             if execution_lang == "fr":
-                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Échec de l'exécution.\"}"
+                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Échec de l'exécution. Cadre de délimitation non valide.\"}"
             else:
-                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Failed to run.\"}"
+                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Failed to run. Invalid Bounding box.\"}"
+            if not websocket is None:
+                await websocket.send(status_update)
+                print("Update websocket:" + status_update)
+            else:
+                post_resp = requests.post(url=status_socket, data=status_update)
+                print("url: " + status_socket + ", posted: " + status_update)
+                print("resp: " + str(post_resp))
+            return
+        elif source_data == None:
+            if execution_lang == "fr":
+                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Échec de l'exécution. Données sources non valides.\"}"
+            else:
+                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Failed to run. Invalid source data.\"}"
+            if not websocket is None:
+                await websocket.send(status_update)
+                print("Update websocket:" + status_update)
+            else:
+                post_resp = requests.post(url=status_socket, data=status_update)
+                print("url: " + status_socket + ", posted: " + status_update)
+                print("resp: " + str(post_resp))
+            return
+        elif output_format == None:
+            if execution_lang == "fr":
+                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Échec de l'exécution. Format de sortie non valide.\"}"
+            else:
+                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Failed to run. Invalid output format.\"}"
+            if not websocket is None:
+                await websocket.send(status_update)
+                print("Update websocket:" + status_update)
+            else:
+                post_resp = requests.post(url=status_socket, data=status_update)
+                print("url: " + status_socket + ", posted: " + status_update)
+                print("resp: " + str(post_resp))
+            return
+        elif sea_level_rise == None:
+            if execution_lang == "fr":
+                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Échec de l'exécution. Élévation du niveau de la mer non valide.\"}"
+            else:
+                status_update = "{\"action\":\"update\",\"jobId\":\"" + job_id + "\",\"status\":\"failed\",\"progress\":"+ jobProgress +",\"message\":\"Failed to run. Invalid Sea Level Rise.\"}"
             if not websocket is None:
                 await websocket.send(status_update)
                 print("Update websocket:" + status_update)
